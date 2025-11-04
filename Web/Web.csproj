@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="images\products\CheesyVegetableLasagna.png" />
+    <Content Include="images\products\ChickenMarsala.png" />
+    <Content Include="images\products\ChickenTeriyakiNoodles.png" />
+    <Content Include="images\products\ChickenTikkaMasala.jpg" />
+    <Content Include="images\products\Congee.png" />
+    <Content Include="images\products\CreamyGochujangTortellini.png" />
+    <Content Include="images\products\CrispyVegetablePakoras.png" />
+    <Content Include="images\products\HaluskiNoodles.png" />
+    <Content Include="images\products\HeartyVegetableLasagna.png" />
+    <Content Include="images\products\ItalianChickenMarinade.png" />
+    <Content Include="images\products\ItalianWeddingSoup.png" />
+    <Content Include="images\products\Kulfi.png" />
+    <Content Include="images\products\PastaSalad.png" />
+    <Content Include="images\products\PepperPasta.png" />
+    <Content Include="images\products\ShrimpEggFooYoung.png" />
+    <Content Include="images\products\TandooriChicken.png" />
+    <Content Include="images\products\VegetarianKorma.png" />
+    <Content Include="images\products\VegetarianRefriedBeans.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Infrastructure\Persistence\Persistence.csproj" />
+    <ProjectReference Include="..\Infrastructure\Presentation\Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+</Project>
