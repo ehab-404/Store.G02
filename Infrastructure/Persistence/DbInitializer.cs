@@ -11,6 +11,7 @@ using Persistence.Data.Contexts;
 using Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Domain.Entities.Identity;
+using Domain.Entities.Orders;
 
 namespace Persistence
 {
@@ -141,7 +142,31 @@ namespace Persistence
             }
 
 
-         await   _context.SaveChangesAsync();
+
+
+            //seeding delivery methods
+
+
+            // 1. read all data from json file as json string  
+
+            var deliveryMethodsData = await File.ReadAllTextAsync(@"..\Infrastructure\Persistence\Data\DataSeeding\delivery.json");
+
+
+            //2. convert json string to List<DeliveryMethod> 
+
+            var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryMethodsData);
+
+            if (deliveryMethods is not null && deliveryMethods.Count > 0)
+            {
+
+                //add list to db if it is not null 
+                await _context.deliveryMethods.AddRangeAsync(deliveryMethods);
+
+
+            }
+
+
+            await   _context.SaveChangesAsync();
 
 
 

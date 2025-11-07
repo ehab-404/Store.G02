@@ -125,7 +125,16 @@ namespace Web.Extenstions
         {
 
 
-            services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<StoreIdentityDbContext>();
+            services.AddIdentity<AppUser, IdentityRole>(
+
+                options =>
+                {
+
+                    options.User.RequireUniqueEmail = true;
+
+                }
+                
+                ).AddEntityFrameworkStores<StoreIdentityDbContext>();
 
 
 

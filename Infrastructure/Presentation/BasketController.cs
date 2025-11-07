@@ -19,7 +19,7 @@ namespace Presentation
 
 
         [HttpGet]
-        async Task<ActionResult> GetBasketById(string id)
+       public async Task<ActionResult> GetBasketById(string id)
         {
 
 
@@ -32,7 +32,7 @@ namespace Presentation
 
 
         [HttpPost]
-        async Task<ActionResult> CreateOrUpdateBasket(BasketDto basketDto )
+       public async Task<ActionResult> CreateOrUpdateBasket(BasketDto basketDto )
         {
 
         var result=   await  _serviceManager.basketService.CreateBasketAsync(basketDto , TimeSpan.FromDays(1));
@@ -44,7 +44,7 @@ namespace Presentation
 
 
         [HttpDelete]
-        async Task<ActionResult> DeleteBasketById(string id)
+      public  async Task<ActionResult> DeleteBasketById(string id)
         {
 
 

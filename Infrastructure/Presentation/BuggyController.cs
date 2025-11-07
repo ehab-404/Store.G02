@@ -38,7 +38,7 @@ namespace Presentation
 
 
             throw new Exception();   //500
-            return Ok();
+            
 
         }
 

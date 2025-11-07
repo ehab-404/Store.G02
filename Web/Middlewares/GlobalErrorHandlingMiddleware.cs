@@ -45,22 +45,34 @@ namespace Web.Middlewares
         private static async Task HandlingErrorAsync(HttpContext context, Exception ex)
         {
 
+
+            if (context.Response.HasStarted) { Console.WriteLine("can not modify headers as response already started");
+                return;
+            
+            }
+
+
+
+
+
+
+
             //1.set status code for response 
             //2.set content type for response 
             //3.ResponseObject(Body)
             //4.Return Response 
 
-            // context.Response.StatusCode= StatusCodes.Status500InternalServerError;
+             context.Response.StatusCode= StatusCodes.Status500InternalServerError;
 
-            context.Response.ContentType = ContentType.ApplicationJson.ToString();
+          context.Response.ContentType = ContentType.ApplicationJson.ToString();
 
-            // context.Response.ContentType = "application/json";
+
             // 
 
             var response = new ErrorDetails(context.Response.StatusCode, ex.Message);
+            
 
-
-            context.Response.StatusCode = ex switch
+            response.StatusCode = ex switch
             {
 
                 NotFoundException => StatusCodes.Status404NotFound,
@@ -71,8 +83,7 @@ namespace Web.Middlewares
 
 
             };
-            response.StatusCode = context.Response.StatusCode;
-
+            
 
             await context.Response.WriteAsJsonAsync(response);
         }

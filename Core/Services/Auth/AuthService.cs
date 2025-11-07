@@ -70,9 +70,9 @@ namespace Services.Auth
             var token = new JwtSecurityToken(
 
                 //issuer: _configuration["JwtOptions:issuer"],
-                issuer: jwtoptions.Issuer,
+                issuer: jwtoptions.issuer,
                // audience: _configuration["JwtOptions:audience"],
-                audience: jwtoptions.Audience,
+                audience: jwtoptions.audience,
                 claims: authClaims,
               //  expires: DateTime.UtcNow.AddDays(double.Parse(_configuration["JwtOptions:DurationInDays"])),
                 expires: DateTime.UtcNow.AddDays(jwtoptions.DurationInDays),

@@ -12,10 +12,12 @@ using Microsoft.Extensions.Options;
 using Services.Abstractions;
 using Services.Abstractions.Baskets;
 using Services.Abstractions.Cashe;
+using Services.Abstractions.Orders;
 using Services.Abstractions.Products;
 using Services.Auth;
 using Services.Baskets;
 using Services.Cashe;
+using Services.Orders;
 using Services.ProductServices;
 using Shared;
 
@@ -37,5 +39,7 @@ namespace Services
 
         public ICasheService casheService { get; } = new CasheService(_cashRepository);
         public IAuthService AuthService { get; } = new AuthService(_userManager   /*_configuration*/ , options );
+
+        public IOrderService orderService { get; } = new OrderService(_unitOfWork, _mapper, _basketRepository);
     }
 }
