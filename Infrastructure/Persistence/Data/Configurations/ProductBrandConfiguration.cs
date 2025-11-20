@@ -13,11 +13,7 @@ namespace Persistence.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ProductBrand> builder)
         {
-
-            builder.Property(p => p.Name).HasColumnType("varchar").HasMaxLength(256);
-
-
-
+            builder.Property(b => b.Name).HasColumnType("varchar").HasMaxLength(256);
 
         }
     }

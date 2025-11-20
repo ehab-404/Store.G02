@@ -14,44 +14,31 @@ using StackExchange.Redis;
 
 namespace Persistence
 {
-    public static class InfrastructureServicesRegistration
+    public static class InfrastructureServicesRegisteration
     {
-
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services , IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddDbContext<StoreDbContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            });
 
-            services.AddDbContext<StoreDbContext>(
+            services.AddDbContext<StoreIdentityDbContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("IdentityConnection"));
+            });
 
-               options =>
-               options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
-               );
-
-
-            services.AddDbContext<StoreIdentityDbContext>(
-
-               options =>
-               options.UseSqlServer(configuration.GetConnectionString("IdentityConnection"))
-               );
 
             services.AddScoped<IDbInitializer, DbInitializer>();
-
-            services.AddSingleton<IConnectionMultiplexer>(
-
-                (serviceprovider) =>
-
-                 ConnectionMultiplexer.Connect(configuration.GetConnectionString("RedisConnection"))
-                );
-
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>
+            {
+                return ConnectionMultiplexer.Connect(configuration.GetConnectionString("RedisConnection")!);
+            });
             services.AddScoped<IBasketRepository, BasketRepository>();
-            services.AddScoped<ICashRepository, CashRepository>();
-
+            services.AddScoped<ICacheRepository, CacheRepository>();
 
             return services;
-
-
-
         }
-
     }
 }

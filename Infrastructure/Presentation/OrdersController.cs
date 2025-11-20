@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Exceptions.BadRequests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Abstractions;
 using Shared.Dtos.Orders;
@@ -13,85 +14,43 @@ namespace Presentation
 {
 
     [ApiController]
-
     [Route("api/[controller]")]
-    public class OrdersController(IServiceManager _serviceManager) :ControllerBase
+    [Authorize]
+    public class OrdersController(IServiceManager _serviceManager) : ControllerBase
     {
-
         [HttpPost]
-        [Route("create")]
-        //baseurl/api/orders
         public async Task<IActionResult> CreateOrder(OrderRequest request)
         {
-            var UserEmailClaim = User.FindFirst(ClaimTypes.Email);
+            var userEmail = User.FindFirst(ClaimTypes.Email);
+            var response = await _serviceManager.OrderService.CreateOrderAsync(request, userEmail.Value);
 
-            if (UserEmailClaim == null) {throw new CreateOrderBadRequest(); }
-
-            var result = await _serviceManager.orderService.CreateOrderAsync(request, UserEmailClaim.Value);
-
-            return Ok(result);
-
-
-
-
+            return Ok(response);
         }
 
-
-
-
-        [HttpGet]
-        [Route("deliverymethods")]
-        public async Task<IActionResult> GetAllDeliveryMethods()
+        [HttpGet("deliverymethods")]
+        public async Task<IActionResult> GetAllDeliveyMethods()
         {
-
-         var deliveryMethods= await  _serviceManager.orderService.GetDeliveryMethodsAsync();
-
-        if(deliveryMethods == null) { return NotFound("delivery methods not found"); }
-
-        return Ok(deliveryMethods);
-
+            var response = await _serviceManager.OrderService.GetAllDeliveryMethodsAsync();
+            return Ok(response);
         }
 
 
-        [HttpGet]
-        [Route("userorder{id}")]
-        public async Task<IActionResult> GetUserOrderById(Guid id , string userEmail)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrderByIdForSpecificUser(Guid id)
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email);
+            var response = await _serviceManager.OrderService.GetOrderByIdForSpecificUserAsync(id, userEmail.Value);
 
-            if (userEmail == null ) { return BadRequest("user Email is invalid"); }
-
-
-      var order=   await   _serviceManager.orderService.GetOrderByIdForSpecifiedUser(id, userEmail);
-
-            if(order == null) { return NotFound(); }
-
-            return Ok(order);
-
-
-
+            return Ok(response);
         }
 
-
-        [HttpGet]
-        [Route("userorders")]
-        public async Task<IActionResult> GetUserOrders( string userEmail)
+        [HttpGet("")]
+        public async Task<IActionResult> GetOrdersForSpecificUser()
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email);
+            var response = await _serviceManager.OrderService.GetOrdersForSpecificUserAsync(userEmail.Value);
 
-            if (userEmail == null) { return BadRequest("user Email is invalid"); }
-
-
-            var orders = await _serviceManager.orderService.GetOrdersForSpecifiedUser( userEmail);
-
-            if (orders == null) { return NotFound(); }
-
-            return Ok(orders);
-
-
-
+            return Ok(response);
         }
-
-
-
-
     }
 }

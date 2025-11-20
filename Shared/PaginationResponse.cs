@@ -8,21 +8,18 @@ namespace Shared
 {
     public class PaginationResponse<TEntity>
     {
-        public PaginationResponse(int pageSize, int pageIndex, int count, IEnumerable<TEntity> data)
+        public PaginationResponse(int pageIndex, int pageSize, int totalCount, IEnumerable<TEntity> data)
         {
-            PageSize = pageSize;
             PageIndex = pageIndex;
-            Count = count;
+            PageSize = pageSize;
+            TotalCount = totalCount;
             Data = data;
         }
 
-        public int PageSize { get; set; }
         public int PageIndex { get; set; }
-        public int Count { get; set; }
+        public int PageSize { get; set; }
+        public int TotalCount { get; set; }
+        public IEnumerable<TEntity> Data { get; set; }
 
-
-
-
-        public IEnumerable<TEntity> Data {  get; set; }
     }
 }

@@ -9,45 +9,32 @@ namespace Domain.Entities.Orders
 {
 
     //table
-    public class Order:BaseEntity<Guid>
+    public class Order : BaseEntity<Guid>
     {
-
-
-        // must for ef core mapping 
         public Order()
         {
         }
 
-
-        public Order(string userEmail, OrderAddress shippingAddress, DeliveryMethod deliveryMethod, ICollection<OrderItem> items, decimal subTotal)
+        public Order(string userEmail, OrderAddress shippingAddress, DeliveryMethod deliveryMethod, ICollection<OrderItem> items, decimal subTotal, string? paymentIntentId)
         {
             UserEmail = userEmail;
             ShippingAddress = shippingAddress;
-            this.deliveryMethod = deliveryMethod;
-            this.items = items;
+            DeliveryMethod = deliveryMethod;
+            Items = items;
             SubTotal = subTotal;
+            PaymentIntentId = paymentIntentId;
         }
 
         public string UserEmail { get; set; }
         public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.Now;
-
-        public OrderStatus status { get; set; } = OrderStatus.Pending;
-
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public OrderAddress ShippingAddress { get; set; }
-
-
+        public DeliveryMethod DeliveryMethod { get; set; }
         public int DeliveryMethodId { get; set; }
-        public DeliveryMethod deliveryMethod { get; set; } //np 
-
-
-        public ICollection<OrderItem> items { get; set; } //np
-
-
+        public ICollection<OrderItem> Items { get; set; }
         public decimal SubTotal { get; set; }
+        public string? PaymentIntentId { get; set; }
 
-        public decimal GetTotal() => SubTotal + deliveryMethod.Price;
-        
-
-
+        public decimal GetTotal() => SubTotal + DeliveryMethod.Price;
     }
 }

@@ -1,8 +1,8 @@
-﻿using Azure.Core;
+﻿using Azure;
 using Domain.Exceptions;
 using Domain.Exceptions.BadRequests;
 using Shared.ErrorModels;
-
+using Microsoft.AspNetCore.Http;
 namespace Web.Middlewares
 {
     public class GlobalErrorHandlingMiddleware
@@ -16,102 +16,60 @@ namespace Web.Middlewares
             _logger = logger;
         }
 
-
         public async Task InvokeAsync(HttpContext context)
         {
-
             try
             {
-                await _next.Invoke(context);
+                await _next(context);
 
-                if(context.Response.StatusCode==StatusCodes.Status404NotFound)
-                {
-                    await HandlingNotFoundEndPointAsync(context);
-
-                }
-
+                // this condition will be true only if invalid endpoint route
+                await HandleInvalidEndpoint(context);
             }
             catch (Exception ex)
             {
-                //log exception    for admin , maintance  
+                _logger.LogError(ex, ex.Message);
 
-                _logger.LogError(ex.Message, ex);
+                context.Response.ContentType = "application/json";
 
-                await HandlingErrorAsync(context, ex);
+                var response = new ErrorDetail()
+                {
+                    ErrorMessage = ex.Message,
+                };
 
+                response.StatusCode = ex switch
+                {
+                    NotFoundException => StatusCodes.Status404NotFound,
+                    BadRequestException => StatusCodes.Status400BadRequest,
+                    NotAuthorizedException => StatusCodes.Status401Unauthorized,
+                    ValidationException validationException => HandleValidationExceptionErrorsList(validationException, response),
+                    _ => StatusCodes.Status500InternalServerError
+                };
+
+                context.Response.StatusCode = response.StatusCode;
+
+                await context.Response.WriteAsJsonAsync(response);
             }
         }
 
-        private static async Task HandlingErrorAsync(HttpContext context, Exception ex)
+        private static int HandleValidationExceptionErrorsList(ValidationException validationError, ErrorDetail response)
         {
+            response.Errors = validationError.Errors;
+            return StatusCodes.Status401Unauthorized;
+        }
 
 
-            if (context.Response.HasStarted) { Console.WriteLine("can not modify headers as response already started");
-                return;
-            
-            }
-
-
-
-
-
-
-
-            //1.set status code for response 
-            //2.set content type for response 
-            //3.ResponseObject(Body)
-            //4.Return Response 
-
-             context.Response.StatusCode= StatusCodes.Status500InternalServerError;
-
-          context.Response.ContentType = ContentType.ApplicationJson.ToString();
-
-
-            // 
-
-            var response = new ErrorDetails(context.Response.StatusCode, ex.Message);
-            
-
-            response.StatusCode = ex switch
+        private static async Task HandleInvalidEndpoint(HttpContext context)
+        {
+            if (context.Response.StatusCode == StatusCodes.Status404NotFound)
             {
-
-                NotFoundException => StatusCodes.Status404NotFound,
-                BadRequestException => StatusCodes.Status400BadRequest,
-                ValidationException=>HandlingVAlidationExceptionAsync((ValidationException) ex , response),
-                UnAuthorizedException => StatusCodes.Status401Unauthorized,
-                _ => StatusCodes.Status500InternalServerError
-
-
-            };
-            
-
-            await context.Response.WriteAsJsonAsync(response);
-        }
-
-        private static async Task HandlingNotFoundEndPointAsync(HttpContext context)
-        {
-            context.Response.ContentType = ContentType.ApplicationJson.ToString();
-            var response = new ErrorDetails(context.Response.StatusCode,
-
-                $"End Point of path {context.Request.Path} Is Not Found"
-             );
-
-
-            await context.Response.WriteAsJsonAsync(response);
-
-        }
-        
-        
-        private static int HandlingVAlidationExceptionAsync(ValidationException exception , ErrorDetails response)
-        {
-
-
-            response.Errors = exception.Errors;
-
-            return StatusCodes.Status400BadRequest;
-
-
-
+                var response = new ErrorDetail()
+                {
+                    StatusCode = StatusCodes.Status404NotFound,
+                    ErrorMessage = $"End point {context.Request.Path} was not found"
+                };
+                await context.Response.WriteAsJsonAsync(response);
+            }
         }
     }
 }
+

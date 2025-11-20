@@ -13,11 +13,8 @@ namespace Persistence.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<OrderItem> builder)
         {
-            builder.OwnsOne(p => p.product);
-
-            builder.Property(p => p.Price).HasColumnType("decimal(18,2)");
-
-
+            builder.OwnsOne(oi => oi.Product);
+            builder.Property(o => o.Price).HasColumnType("decimal(18,2)");
         }
     }
 }

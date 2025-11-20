@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Shared.Dtos.Products
 {
-    public class BrandResponse
+    public class TypeBrandResponse
     {
+        public int Id { get; set; }
         public string Name { get; set; }
-
-
     }
 }

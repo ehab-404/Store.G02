@@ -12,49 +12,28 @@ namespace Presentation
 
     [ApiController]
     [Route("api/[controller]")]
-
-
-    public class BasketController(IServiceManager _serviceManager):ControllerBase
+    public class BasketsController(IServiceManager _serviceManager) : ControllerBase
     {
-
-
         [HttpGet]
-       public async Task<ActionResult> GetBasketById(string id)
+        public async Task<IActionResult> GetBasketByIdAsync(string id)
         {
-
-
-            var basket = await _serviceManager.basketService.GetBasketAsync(id);
-
-            return Ok(basket);
-
-
+            var result = await _serviceManager.BasketService.GetBasketByIdAsync(id);
+            return Ok(result);
         }
-
 
         [HttpPost]
-       public async Task<ActionResult> CreateOrUpdateBasket(BasketDto basketDto )
+        public async Task<IActionResult> CreateOrUpdateBasketAsync(CustomerBasketDto basketDto)
         {
-
-        var result=   await  _serviceManager.basketService.CreateBasketAsync(basketDto , TimeSpan.FromDays(1));
-
+            var result = await _serviceManager.BasketService.CreateOrUpdateBasketAsync(basketDto, TimeSpan.FromDays(30));
             return Ok(result);
-        
         }
-
-
 
         [HttpDelete]
-      public  async Task<ActionResult> DeleteBasketById(string id)
+        public async Task<IActionResult> DeleteBasketAsync(string id)
         {
-
-
-            var flag = await _serviceManager.basketService.DeleteBasketAsync(id);
-
-            return NoContent();
-
-
+            await _serviceManager.BasketService.DeleteBasketAsync(id);
+            return NoContent();     // 204
         }
-
 
     }
 }

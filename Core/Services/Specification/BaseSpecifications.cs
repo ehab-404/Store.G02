@@ -9,58 +9,35 @@ using Domain.Entities;
 
 namespace Services.Specification
 {
-    public class BaseSpecifications<TKey, TEntity> : ISpecification<TKey, TEntity> where TEntity : BaseEntity<TKey>
+    public abstract class BaseSpecification<TEntity, TKey> : ISpecification<TEntity, TKey> where TEntity : BaseEntity<TKey>
     {
-        public IList<Expression<Func<TEntity, object>>>? Includes { get; set; } = new List<Expression<Func<TEntity,object>>>();
-    
-        
-        
-        public Expression<Func<TEntity, bool>>? Criteria { get ; set ; }
-        public Expression<Func<TEntity, object>>? OrderBy {get; set ; }
-        public Expression<Func<TEntity, object>>? OrderByDescending { get ; set; }
+        public List<Expression<Func<TEntity, object>>> Include { get; set; } = new();
+        public Expression<Func<TEntity, bool>>? Criteria { get; set; }
+        public Expression<Func<TEntity, object>>? OrderBy { get; set; }
+        public Expression<Func<TEntity, object>>? OrderByDesc { get; set; }
+        public int Skip { get; set; }
+        public int Take { get; set; }
+        public bool IsPaginated { get; set; }
 
-
-       public int Skip { get; set; }
-       public int Take { get; set; }
-       public bool IsPagination { get; set; }
-
-
-
-        public BaseSpecifications(Expression<Func<TEntity, bool>>? expression)
+        public BaseSpecification(Expression<Func<TEntity, bool>>? criteria)
         {
-            
-            Criteria=expression;
+            Criteria = criteria;
         }
 
 
-        public void ApplyPagination( int pageIndex, int pageSize)
+        protected void AddIncludeExp(Expression<Func<TEntity, object>> exp) => Include.Add(exp);
+        protected void AddOrderBy(Expression<Func<TEntity, object>> exp) => OrderBy = exp;
+        protected void AddOrderByDesc(Expression<Func<TEntity, object>> exp) => OrderByDesc = exp;
+        protected void AddPagination(int pageIndex, int pageSize)
         {
-
-            IsPagination = true;
-            Skip = (pageIndex - 1) * pageSize;
-
-            Take = pageSize;
-
-
-
-
+            if (pageIndex > 0 && pageSize > 0)
+            {
+                Skip = (pageIndex - 1) * pageSize;
+                Take = pageSize;
+                IsPaginated = true;
+            }
+            else
+                IsPaginated = false;
         }
-
-        public void AddOrderBy(Expression<Func<TEntity, object>>?  expression)
-        {
-
-            OrderBy=expression;
-
-        }
-
-        public void AddOrderByDescinding(Expression<Func<TEntity, object>>? expression)
-        {
-
-            OrderByDescending = expression;
-
-        }
-
     }
-
-    
 }

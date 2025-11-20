@@ -10,11 +10,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Persistence.Data.Configurations
 {
-    public class ProductTypeConfiguration : IEntityTypeConfiguration<ProductType>
+    internal class ProductTypeConfiguration : IEntityTypeConfiguration<ProductType>
     {
         public void Configure(EntityTypeBuilder<ProductType> builder)
         {
-            builder.Property(p => p.Name).HasColumnType("varchar").HasMaxLength(256);
+            builder.Property(t => t.Name).HasColumnType("varchar").HasMaxLength(256);
 
         }
     }

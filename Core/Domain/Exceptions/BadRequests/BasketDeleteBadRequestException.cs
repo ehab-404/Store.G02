@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions.BadRequests
 {
-    public class DeleteBasketBadRequestException():
+    public class BasketDeleteBadRequestException():
         Exception("Invalid operation when delete the basket !!")
 
     {

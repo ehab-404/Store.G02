@@ -10,62 +10,31 @@ using Microsoft.EntityFrameworkCore.Query;
 
 namespace Persistence
 {
-    public class SpecificationEvaluator
+    public static class SpecificationEvaluator
     {
 
-
-        //generate dynamic query  
-        public static IQueryable<TEntity> GetQuery<TKey,TEntity>(IQueryable<TEntity> inputQuery
-            ,ISpecification<TKey,TEntity> specification) where TEntity : BaseEntity<TKey>
+        // Generate dynamic query (depending on spec)
+        public static IQueryable<TEntity> GetQuery<TEntity, TKey>(IQueryable<TEntity> inputQuery, ISpecification<TEntity, TKey> spec) where TEntity : BaseEntity<TKey>
         {
-
             var query = inputQuery;
 
+            if (spec.Criteria is not null)
+                query = query.Where(spec.Criteria);
 
-            if(specification.Criteria is not null)
+            if (spec.Include.Any())
+                query = spec.Include.Aggregate(query, (current, exp) => current.Include(exp));
+
+            if (spec.OrderBy is not null)
+                query = query.OrderBy(spec.OrderBy);
+
+            else if (spec.OrderByDesc is not null)
+                query = query.OrderByDescending(spec.OrderByDesc);
+
+            if (spec.IsPaginated)
             {
-              //query =  query.Where(specification.Criteria); //context.entity.where(conditions)
-  
+                query = query.Skip(spec.Skip).Take(spec.Take);
             }
-
-
-
-
-            if(specification.OrderBy is not null)
-            {
-                query=query.OrderBy(specification.OrderBy);
-            }
-            
-            else if(specification.OrderByDescending is not null)
-            {
-                query=query.OrderByDescending(specification.OrderByDescending);
-            }
-
-
-
-            if (specification.IsPagination)
-            {
-
-                query = query.Skip(specification.Skip).Take(specification.Take);
-
-
-            }
-
-
-
-
-            foreach (var include in specification.Includes)
-            {
-                query = query.Include(include);
-
-            }
-
-
             return query;
-            //context.entity.where(conditions).include().include()
-            //specification.Includes.Aggregate(query, (query, includeExpression) =>
-            //query.Include(includeExpression));
-
         }
     }
 }

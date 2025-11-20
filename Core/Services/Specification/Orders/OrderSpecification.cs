@@ -7,26 +7,23 @@ using Domain.Entities.Orders;
 
 namespace Services.Specification.Orders
 {
-    public class OrderSpecification :BaseSpecifications<Guid,Order>
+    public class OrderSepecification : BaseSpecification<Order, Guid>
     {
-        public OrderSpecification(Guid Id ,string userEmail):base(o=>o.Id==Id && o.UserEmail.ToLower()==userEmail.ToLower())
+        // a specific order for specific user
+        public OrderSepecification(Guid id, string userEmail)
+            : base(o => o.Id == id && o.UserEmail.ToLower() == userEmail.ToLower())
         {
-
-            Includes.Add(o => o.deliveryMethod);
-            Includes.Add(o => o.items);
-
-
-        }
-        
-        public OrderSpecification(string userEmail):base(o=> o.UserEmail.ToLower()==userEmail.ToLower())
-        {
-
-            Includes.Add(o => o.deliveryMethod);
-            Includes.Add(o => o.items);
-            AddOrderByDescinding(o => o.OrderDate);
-
+            AddIncludeExp(o => o.Items);
+            AddIncludeExp(o => o.DeliveryMethod);
         }
 
-
+        // all orders for specific user
+        public OrderSepecification(string userEmail)
+            : base(o => o.UserEmail.ToLower() == userEmail.ToLower())
+        {
+            AddIncludeExp(o => o.Items);
+            AddIncludeExp(o => o.DeliveryMethod);
+            AddOrderByDesc(o => o.OrderDate);
+        }
     }
 }

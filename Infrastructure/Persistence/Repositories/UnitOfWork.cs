@@ -10,57 +10,35 @@ using Persistence.Data.Contexts;
 
 namespace Persistence.Repositories
 {
-    public class UnitOfWork(StoreDbContext _storeDbContext) : IUnitOfWork
+    public class UnitOfWork(StoreDbContext _context) : IUnitOfWork
     {
-        //private Dictionary<string, object> _repositories=new Dictionary<string, object>();
+        //private readonly Dictionary<string, object> _repositories = new Dictionary<string, object>();
+        private readonly ConcurrentDictionary<string, object> _repositories = new ConcurrentDictionary<string, object>();
 
 
-
-        //public IGenericRepository<TKey, TEntity> GetRepository<TKey, TEntity>() where TEntity : BaseEntity<TKey>
-        //{
-        //    var type = typeof(TEntity).Name;
-
-        //    if (! _repositories.ContainsKey(type))
-        //    {
-
-        //        var repository = new GenericRepository<TKey, TEntity>(_storeDbContext);
-        //        _repositories.Add(type, repository);
-
-
-
-
-        //    }
-
-        //    return (IGenericRepository<TKey, TEntity>)_repositories[type];
-
-
-
-        //}
-
-
-
-
-
-        //container of repositories of all types as dictionary  key: string =name of the type
-        //and key is object = repository 
-
-        private ConcurrentDictionary<string, object> _repositories = new ConcurrentDictionary<string, object>();
-
-
-
-        public IGenericRepository<TKey, TEntity> GetRepository<TKey, TEntity>() where TEntity : BaseEntity<TKey>
+        public IGenericRepository<TEntity, TKey> CreateRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>
         {
-           
-            return (IGenericRepository < TKey, TEntity > ) _repositories.GetOrAdd(typeof(TKey).Name,new GenericRepository<TKey,TEntity>(_storeDbContext));
+            //var repoName = typeof(TEntity).Name;
+
+            //if (!_repositories.ContainsKey(repoName))
+            //{
+            //    var repo = new GenericRepository<TEntity, TKey>(_context);
+            //    _repositories.Add(repoName, repo);
+            //}
+
+            //return (IGenericRepository<TEntity, TKey>) _repositories[repoName];
 
 
+            var repoName = typeof(TEntity).Name;
 
+            return (IGenericRepository<TEntity, TKey>)_repositories.GetOrAdd(repoName, new GenericRepository<TEntity, TKey>(_context));
 
         }
 
         public async Task<int> SaveChangesAsync()
         {
-            return await _storeDbContext.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
     }
 }
+

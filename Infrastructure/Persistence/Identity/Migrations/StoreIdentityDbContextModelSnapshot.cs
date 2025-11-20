@@ -46,6 +46,10 @@ namespace Persistence.Identity.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Street")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -70,7 +74,7 @@ namespace Persistence.Identity.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DisplayName")
+                    b.Property<string>("DiplayName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -262,11 +266,13 @@ namespace Persistence.Identity.Migrations
 
             modelBuilder.Entity("Domain.Entities.Identity.Address", b =>
                 {
-                    b.HasOne("Domain.Entities.Identity.AppUser", null)
+                    b.HasOne("Domain.Entities.Identity.AppUser", "AppUser")
                         .WithOne("Address")
                         .HasForeignKey("Domain.Entities.Identity.Address", "AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

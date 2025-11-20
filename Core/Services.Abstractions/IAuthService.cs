@@ -10,11 +10,11 @@ namespace Services.Abstractions
 {
     public interface IAuthService
     {
-      Task<UserResultDto>   LoginAsync(LoginDto loginDto);
-      Task<UserResultDto>   RegisterAsync(RegisterDto registerDto);
-
-
-      Task<string> GenerateJwtTokenAsync(AppUser user);
-
+        Task<UserResponse> LoginAsync(LoginRequestDto request);
+        Task<UserResponse> RegisterAsync(RegisterRequestDto request);
+        Task<bool> CheckEmailExistsAsync(string userEmail);
+        Task<UserResponse> GetCurrentUserAsync(string userEmail, string currentUserToken);
+        Task<AddressDto> GetUserAddressAsync(string UserEmail);
+        Task<AddressDto> UpdateUserAddressAsync(AddressDto address, string userEmail);
     }
 }

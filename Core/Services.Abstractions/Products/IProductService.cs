@@ -11,15 +11,10 @@ namespace Services.Abstractions.Products
 {
     public interface IProductService
     {
-
-        Task</*IEnumerable<ProductResponse>*/ PaginationResponse<ProductResponse>> GetAllProductsAsync(ProductQueryParamters queryParamters);
-
+        Task<PaginationResponse<ProductResponse>> GetAllProductsAsync(ProductQueryParams productParams);
         Task<ProductResponse> GetProductByIdAsync(int id);
-
-        Task<IEnumerable<BrandResponse>> GetAllBrandsAsync();
-
-        Task<IEnumerable<TypeResponse>> GetAllTypesAsync();
-
+        Task<IEnumerable<TypeBrandResponse>> GetAllBrandsAsync();
+        Task<IEnumerable<TypeBrandResponse>> GetAllTypesAsync();
 
     }
 }

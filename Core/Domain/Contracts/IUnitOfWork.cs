@@ -9,23 +9,7 @@ namespace Domain.Contracts
 {
     public interface IUnitOfWork
     {
-        //generate repository 
-
-        IGenericRepository<TKey, TEntity> GetRepository<TKey, TEntity>() where TEntity : BaseEntity<TKey>;
-
-
+        IGenericRepository<TEntity, TKey> CreateRepository<TEntity, TKey>() where TEntity : BaseEntity<TKey>;
         Task<int> SaveChangesAsync();
-
-
-
-
-
-
-
-
-
-
-        //save changes
-
     }
 }

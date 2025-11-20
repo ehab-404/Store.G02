@@ -9,10 +9,8 @@ namespace Domain.Contracts
 {
     public interface IBasketRepository
     {
-
-      Task<CustomerBasket?>   GetBasketAsync(string id);
-      Task<CustomerBasket?>   CreateBasketAsync(CustomerBasket basket ,TimeSpan duration);
-
-    Task<bool> DeleteBasketAsync(string id); 
+        Task<CustomerBasket?> GetBasketByIdAsync(string id);
+        Task<CustomerBasket?> CreateOrUpdateBasketAsync(CustomerBasket basket, TimeSpan duration);
+        Task<bool> DeleteBasketAsync(string id);
     }
 }

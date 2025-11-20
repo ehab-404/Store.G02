@@ -13,11 +13,10 @@ namespace Persistence.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<DeliveryMethod> builder)
         {
-            builder.Property(p => p.ShortName).HasColumnType("varchar").HasMaxLength(128);
-            builder.Property(p => p.Description).HasColumnType("varchar").HasMaxLength(256);
-            builder.Property(p => p.DeliveryTime).HasColumnType("varchar").HasMaxLength(128);
-            builder.Property(p => p.Price).HasColumnType("decimal(18,2)");
-
+            builder.Property(d => d.ShortName).HasColumnType("varchar").HasMaxLength(128);
+            builder.Property(d => d.Description).HasColumnType("varchar").HasMaxLength(256);
+            builder.Property(d => d.DeliveryTime).HasColumnType("varchar").HasMaxLength(256);
+            builder.Property(o => o.Price).HasColumnType("decimal(18,2)");
         }
     }
 }

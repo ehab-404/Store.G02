@@ -10,35 +10,17 @@ using Shared.Dtos.Products;
 
 namespace Services.Mapping.Products
 {
-    public class ProductProfile :Profile
+    public class ProductProfile : Profile
     {
-
-        
-
         public ProductProfile(IConfiguration configuration)
         {
-
-
-            var baseUrl = configuration["BaseUrl"];
-
-
             CreateMap<Product, ProductResponse>()
-                .ForMember(d=>d.Brand, o => o.MapFrom(s => s.Brand.Name))
-                .ForMember(p => p.Type, o => o.MapFrom(s => s.Type.Name))
-                .ForMember(D=>D.PictureUrl,s=>s.MapFrom(new ProductPictureUrlResolver(configuration)));
+                .ForMember(pr => pr.Brand, o => o.MapFrom(p => p.Brand.Name))
+                .ForMember(pr => pr.Type, o => o.MapFrom(p => p.Type.Name))
+                .ForMember(pr => pr.PictureUrl, o => o.MapFrom(new ProductPictureUrlResolver(configuration)));
 
-
-
-            // .ForMember(D=>D.PictureUrl,s=>s.MapFrom(s => $"{baseUrl }/{s.PictureUrl}"));
-
-
-            CreateMap<ProductBrand, BrandResponse>();
-            CreateMap<ProductType, TypeResponse>();
-
-
-
-
+            CreateMap<ProductBrand, TypeBrandResponse>();
+            CreateMap<ProductType, TypeBrandResponse>();
         }
-
     }
 }

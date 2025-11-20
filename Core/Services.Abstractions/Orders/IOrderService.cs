@@ -9,15 +9,9 @@ namespace Services.Abstractions.Orders
 {
     public interface IOrderService
     {
-        Task<OrderResponse?> CreateOrderAsync(OrderRequest request, string userEmail);
-        
-
-        Task<IEnumerable<DeliveryMethodResponse>> GetDeliveryMethodsAsync();
-
-        Task<OrderResponse> GetOrderByIdForSpecifiedUser(Guid Id , string userEmail);
-        Task<IEnumerable<OrderResponse>> GetOrdersForSpecifiedUser(string userEmail);
-
-
-
+        Task<OrderResponse> CreateOrderAsync(OrderRequest request, string userEmail);
+        Task<IEnumerable<DeliveryMethodResponse>> GetAllDeliveryMethodsAsync();
+        Task<OrderResponse?> GetOrderByIdForSpecificUserAsync(Guid id, string userEmail);
+        Task<IEnumerable<OrderResponse>> GetOrdersForSpecificUserAsync(string userEmail);
     }
 }

@@ -14,15 +14,8 @@ namespace Services.Mapping.Products
     {
         public string Resolve(Product source, ProductResponse destination, string destMember, ResolutionContext context)
         {
-            
-            if(!string.IsNullOrEmpty(source.PictureUrl))
-            {
-
-                return $"{configuration["BaseUrl"]}/{source.PictureUrl}";
-
-
-
-            }
+            if (!string.IsNullOrEmpty(source.PictureUrl))
+                return $"{configuration["BaseUrl"]}{source.PictureUrl}";
 
             return string.Empty;
         }

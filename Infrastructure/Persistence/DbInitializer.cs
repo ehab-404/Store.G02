@@ -12,245 +12,102 @@ using Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Domain.Entities.Identity;
 using Domain.Entities.Orders;
+using Domain.Entities;
 
 namespace Persistence
 {
-    public class DbInitializer(StoreDbContext _context , 
-        StoreIdentityDbContext _storeIdentityDbContext
-        
-        , UserManager<AppUser> _userManager,
-
-        RoleManager<IdentityRole> _roleManager
-        ): IDbInitializer
+    public class DbInitializer(StoreDbContext _context,
+         StoreIdentityDbContext _identityContext,
+         UserManager<AppUser> _userManager,
+         RoleManager<IdentityRole> _roleManager) : IDbInitializer
     {
-        //private readonly StoreDbContext _context;
-
-        //public DbInitializer(StoreDbContext context)
-        //{
-        //    _context = context;
-        //}
-
-        public async Task InitializeAsync( )
+        public async Task InitializeAsync()
         {
-            //create db if not created 
-            // and update db
-           
+            // check db exists or not. if not, it creates it and apply pending migration
+            var pendingMigration = await _context.Database.GetPendingMigrationsAsync();
 
-            if (_context.Database.GetPendingMigrationsAsync().GetAwaiter().GetResult().Any())
+            if (pendingMigration.Any())
+                await _context.Database.MigrateAsync();
+
+
+            // Seeding
+            if (!_context.ProductBrands.Any())
             {
-               await _context.Database.MigrateAsync();
-
+                await SeedData<ProductBrand, int>("brands");
             }
 
-
-
-            //data seeding  if tables are empety
-
-
-            //product brands
-
-        if(!_context.productBrands.Any())
+            if (!_context.ProductTypes.Any())
             {
-
-
-                // 1. read all data from json file as json string  
-
-                var brandsdata = await File.ReadAllTextAsync(@"..\Infrastructure\Persistence\Data\DataSeeding\brands.json");
-
-
-                //2. convert json string to List<ProductBrand> 
-
-                var brands = JsonSerializer.Deserialize<List<ProductBrand>>(brandsdata);
-
-                if (brands is not null && brands.Count > 0)
-                {
-
-                    //add list to db if it is not null 
-                    await _context.productBrands.AddRangeAsync(brands);
-
-
-                }
-
+                await SeedData<ProductType, int>("types");
             }
 
-
-
-
-
-
-            //product type
-
-
-
-            if (!_context.productTypes.Any())
+            if (!_context.Products.Any())
             {
-
-
-                // 1. read all data from json file as json string  
-
-                var typesdata = await File.ReadAllTextAsync(@"..\Infrastructure\Persistence\Data\DataSeeding\types.json");
-
-
-                //2. convert json string to List<Producttypes> 
-
-                var types = JsonSerializer.Deserialize<List<ProductType>>(typesdata);
-
-                if (types is not null && types.Count > 0)
-                {
-
-                    //add list to db if it is not null 
-                    await _context.productTypes.AddRangeAsync(types);
-
-
-                }
-
+                await SeedData<Product, int>("products");
             }
 
-
-
-
-
-
-
-            //product
-
-
-
-
-            if (!_context.products.Any())
+            if (!_context.DeliveryMethods.Any())
             {
-
-
-                // 1. read all data from json file as json string  
-
-                var productsdata = await File.ReadAllTextAsync(@"..\Infrastructure\Persistence\Data\DataSeeding\products.json");
-
-
-                //2. convert json string to List<ProductBrand> 
-
-                var products = JsonSerializer.Deserialize<List<Product>>(productsdata);
-
-                if (products is not null && products.Count > 0)
-                {
-
-                    //add list to db if it is not null 
-                    await _context.products.AddRangeAsync(products);
-
-
-                }
-
+                await SeedData<DeliveryMethod, int>("delivery");
             }
 
-
-
-
-            //seeding delivery methods
-
-
-            // 1. read all data from json file as json string  
-
-            var deliveryMethodsData = await File.ReadAllTextAsync(@"..\Infrastructure\Persistence\Data\DataSeeding\delivery.json");
-
-
-            //2. convert json string to List<DeliveryMethod> 
-
-            var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliveryMethodsData);
-
-            if (deliveryMethods is not null && deliveryMethods.Count > 0)
-            {
-
-                //add list to db if it is not null 
-                await _context.deliveryMethods.AddRangeAsync(deliveryMethods);
-
-
-            }
-
-
-            await   _context.SaveChangesAsync();
-
-
-
-
-
+            await _context.SaveChangesAsync();
         }
 
         public async Task InitializeIdentityAsync()
         {
-            // create if not exists and apply any pending migrations 
+            var identityPendingMigration = await _identityContext.Database.GetPendingMigrationsAsync();
 
-            if(_storeIdentityDbContext.Database.GetAppliedMigrations().Any())
-            {
+            if (identityPendingMigration.Any())
+                await _identityContext.Database.MigrateAsync();
 
-               await _storeIdentityDbContext.Database.MigrateAsync();
-
-
-
-
-            }
-
-
-            if(! _roleManager.Roles.Any())
+            if (!_roleManager.Roles.Any())
             {
                 await _roleManager.CreateAsync(new IdentityRole()
-
-
-                {
-                    Name = "Admin"
-
-                });
-
-
-                await _roleManager.CreateAsync(new IdentityRole()
-
-
                 {
                     Name = "SuperAdmin"
-
                 });
-
+                await _roleManager.CreateAsync(new IdentityRole()
+                {
+                    Name = "Admin"
+                });
             }
 
-            //seeding 
-
-
-            if(! _userManager.Users.Any())
+            if (!_userManager.Users.Any())
             {
-
-                var superAdminUser = new AppUser()
+                var superAdmin = new AppUser()
                 {
-
-                    DisplayName = "Super Admin",
-                    Email = "Popehab057@gmail.com",
+                    DiplayName = "SuperAdmin",
                     UserName = "SuperAdmin",
-                    PhoneNumber = "01120206311"
-
-
-
-                };
-
-                var AdminUser = new AppUser()
-                {
-
-                    DisplayName = "Admin",
-                    Email = "ehababdelmohsen01@gmail.com",
-                    UserName = "Admin",
+                    Email = "SuperAdmin@gmail.com",
                     PhoneNumber = "01098566020"
-
-
-
+                };
+                var admin = new AppUser()
+                {
+                    DiplayName = "Admin",
+                    UserName = "Admin",
+                    Email = "Admin@gmail.com",
+                    PhoneNumber = "01120206311"
                 };
 
+                await _userManager.CreateAsync(superAdmin, "Pa$$w0rd");
+                await _userManager.CreateAsync(admin, "Pa$$w0rd");
 
-
-                await _userManager.CreateAsync(superAdminUser, "P@ssw0rd");
-                await _userManager.CreateAsync(AdminUser, "P@ssw0rd");
-                await _userManager.AddToRoleAsync(superAdminUser, "SuperAdmin");
-                await _userManager.AddToRoleAsync(AdminUser, "Admin");
-
+                await _userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
+                await _userManager.AddToRoleAsync(admin, "Admin");
             }
+        }
 
+        private async Task SeedData<TData, TKey>(string jsonName) where TData : BaseEntity<TKey>
+        {
+            var basePath = Directory.GetCurrentDirectory();
 
+            //var fullPath = Path.Combine(basePath,"Infrastructure", "Persistence","Data", "DataSeeding", $"{jsonName}.json");
+            var jsonData = await File.ReadAllTextAsync($"..\\Infrastructure\\Persistence\\Data\\DataSeeding\\{jsonName}.json");
+            var dataList = JsonSerializer.Deserialize<List<TData>>(jsonData);
 
+            if (dataList is not null && dataList.Count != 0)
+                await _context.Set<TData>().AddRangeAsync(dataList);
         }
     }
 }

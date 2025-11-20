@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Contracts
 {
-    public interface ICashRepository
+    public interface ICacheRepository
     {
-
-        Task<string?> GetAsync(string id);
-
-        Task SetAsync(string id,object value,TimeSpan duration );
-
+        Task SetAsync(string key, object value, TimeSpan duration);
+        Task<string?> GetAsync(string key);
     }
 }

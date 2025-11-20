@@ -32,7 +32,7 @@ namespace Persistence.Data.Migrations
 
                     b.Property<string>("DeliveryTime")
                         .IsRequired()
-                        .HasMaxLength(128)
+                        .HasMaxLength(256)
                         .HasColumnType("varchar");
 
                     b.Property<string>("Description")
@@ -50,7 +50,7 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("deliveryMethods");
+                    b.ToTable("DeliveryMethods");
                 });
 
             modelBuilder.Entity("Domain.Entities.Orders.Order", b =>
@@ -65,6 +65,12 @@ namespace Persistence.Data.Migrations
                     b.Property<DateTimeOffset>("OrderDate")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("SubTotal")
                         .HasColumnType("decimal(18,2)");
 
@@ -72,14 +78,11 @@ namespace Persistence.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("status")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DeliveryMethodId");
 
-                    b.ToTable("orders");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Domain.Entities.Orders.OrderItem", b =>
@@ -103,7 +106,7 @@ namespace Persistence.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("orderItems");
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.Product", b =>
@@ -133,6 +136,7 @@ namespace Persistence.Data.Migrations
                         .HasColumnType("varchar");
 
                     b.Property<decimal>("Price")
+                        .HasMaxLength(256)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TypeId")
@@ -144,7 +148,7 @@ namespace Persistence.Data.Migrations
 
                     b.HasIndex("TypeId");
 
-                    b.ToTable("products");
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.ProductBrand", b =>
@@ -162,7 +166,7 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("productBrands");
+                    b.ToTable("ProductBrands");
                 });
 
             modelBuilder.Entity("Domain.Entities.Products.ProductType", b =>
@@ -180,12 +184,12 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("productTypes");
+                    b.ToTable("ProductTypes");
                 });
 
             modelBuilder.Entity("Domain.Entities.Orders.Order", b =>
                 {
-                    b.HasOne("Domain.Entities.Orders.DeliveryMethod", "deliveryMethod")
+                    b.HasOne("Domain.Entities.Orders.DeliveryMethod", "DeliveryMethod")
                         .WithMany()
                         .HasForeignKey("DeliveryMethodId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -218,26 +222,26 @@ namespace Persistence.Data.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("orders");
+                            b1.ToTable("Orders");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
                         });
 
+                    b.Navigation("DeliveryMethod");
+
                     b.Navigation("ShippingAddress")
                         .IsRequired();
-
-                    b.Navigation("deliveryMethod");
                 });
 
             modelBuilder.Entity("Domain.Entities.Orders.OrderItem", b =>
                 {
                     b.HasOne("Domain.Entities.Orders.Order", null)
-                        .WithMany("items")
+                        .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.OwnsOne("Domain.Entities.Orders.ProductInOrderItem", "product", b1 =>
+                    b.OwnsOne("Domain.Entities.Orders.ProductInOrderItem", "Product", b1 =>
                         {
                             b1.Property<int>("OrderItemId")
                                 .HasColumnType("int");
@@ -255,13 +259,13 @@ namespace Persistence.Data.Migrations
 
                             b1.HasKey("OrderItemId");
 
-                            b1.ToTable("orderItems");
+                            b1.ToTable("OrderItems");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderItemId");
                         });
 
-                    b.Navigation("product")
+                    b.Navigation("Product")
                         .IsRequired();
                 });
 
@@ -286,7 +290,7 @@ namespace Persistence.Data.Migrations
 
             modelBuilder.Entity("Domain.Entities.Orders.Order", b =>
                 {
-                    b.Navigation("items");
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

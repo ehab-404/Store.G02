@@ -2,12 +2,7 @@
 {
     public class ValidationError
     {
-
-        public string FieldName { get; set; } 
-
-
+        public string Field { get; set; }
         public IEnumerable<string> Errors { get; set; }
-
-
     }
 }

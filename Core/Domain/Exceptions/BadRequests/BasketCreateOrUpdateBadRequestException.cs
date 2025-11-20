@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions.BadRequests
 {
-    public class CreateOrderBadRequest():BadRequestException("Invalid Operation when create order")
+    public  class BasketCreateOrUpdateBadRequestException(string message="Invalid Operation when create or update basket !!") 
+        : Exception(message)
     {
+
+
+
     }
 }

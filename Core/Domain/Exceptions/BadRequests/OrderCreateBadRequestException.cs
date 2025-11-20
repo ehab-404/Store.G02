@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions.BadRequests
 {
-    public class DeliveryMethodNotFoundException(int id):NotFoundException($"delivery method with id {id} was not found ")
+    public class OrderCreateBadRequestException():BadRequestException("Invalid Operation when create order")
     {
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Exceptions
 {
-    public class UnAuthorizedException(string message="Invalid Email Or Password") : Exception(message)
+    public class NotAuthorizedException(string message="Invalid Email Or Password") : Exception(message)
     {
     }
 }

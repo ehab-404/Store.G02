@@ -8,26 +8,15 @@ using Domain.Entities;
 
 namespace Domain.Contracts
 {
-    public interface ISpecification<TKey,TEntity> where TEntity:BaseEntity<TKey>
+
+    public interface ISpecification<TEntity, TKey> where TEntity : BaseEntity<TKey>
     {
-
-        IList<Expression<Func<TEntity, object>>>? Includes { get; set; }
-        
-
-        Expression<Func<TEntity,bool>>? Criteria { get; set; }
-
-
-        Expression<Func<TEntity,object>>? OrderBy { get; set; }
-         Expression<Func<TEntity,object>>? OrderByDescending { get; set; }
-
-
-         int Skip { get; set; }
-         int Take { get; set; }
-         bool IsPagination { get; set; }
-
-
-
-
-
+        List<Expression<Func<TEntity, object>>> Include { get; set; }
+        Expression<Func<TEntity, bool>>? Criteria { get; set; }
+        Expression<Func<TEntity, object>>? OrderBy { get; set; }
+        Expression<Func<TEntity, object>>? OrderByDesc { get; set; }
+        int Skip { get; set; }
+        int Take { get; set; }
+        bool IsPaginated { get; set; }
     }
 }

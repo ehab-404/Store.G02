@@ -13,33 +13,32 @@ using Services.Abstractions;
 using Services.Abstractions.Baskets;
 using Services.Abstractions.Cashe;
 using Services.Abstractions.Orders;
+using Services.Abstractions.Payments;
 using Services.Abstractions.Products;
 using Services.Auth;
 using Services.Baskets;
 using Services.Cashe;
 using Services.Orders;
+using Services.Payments;
 using Services.ProductServices;
 using Shared;
 
 namespace Services
 {
-    public class ServiceManager(IUnitOfWork _unitOfWork , IMapper _mapper,
-        IBasketRepository _basketRepository , ICashRepository _cashRepository
-        ,UserManager<AppUser> _userManager
-       // , IConfiguration _configuration
-       ,IOptions<JwtOptions> options
-
-
-        ) :
-        IServiceManager
+    public class ServiceManager(IUnitOfWork unitOfWork,
+          IBasketRepository basketRepository,
+          ICacheRepository cacheRepository,
+          UserManager<AppUser> userManager,
+          IOptions<JwtOptions> options,
+          IMapper mapper,
+          IConfiguration configuration) : IServiceManager
     {
-        public IProductService productService { get; } = new ProductService(_unitOfWork, _mapper);
+        public IProductService ProductService { get; } = new ProductService(unitOfWork, mapper);
+        public IBasketService BasketService { get; } = new BasketService(basketRepository, mapper);
+        public ICacheService CacheService { get; } = new CacheService(cacheRepository);
+        public IAuthService AuthService { get; } = new AuthService(userManager, options, mapper);
 
-        public IBasketService basketService { get; } = new BasketService( _basketRepository,_mapper);
-
-        public ICasheService casheService { get; } = new CasheService(_cashRepository);
-        public IAuthService AuthService { get; } = new AuthService(_userManager   /*_configuration*/ , options );
-
-        public IOrderService orderService { get; } = new OrderService(_unitOfWork, _mapper, _basketRepository);
+        public IOrderService OrderService { get; } = new OrderService(unitOfWork, mapper, basketRepository);
+        public IPaymentService PaymentService { get; } = new PaymentService(basketRepository, unitOfWork, configuration, mapper);
     }
 }

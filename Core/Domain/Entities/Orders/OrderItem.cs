@@ -1,7 +1,8 @@
 ﻿namespace Domain.Entities.Orders
 {
 
-    //table 
+    
+    // Table
     public class OrderItem : BaseEntity<int>
     {
         public OrderItem()
@@ -10,16 +11,13 @@
 
         public OrderItem(ProductInOrderItem product, decimal price, int quantity)
         {
-            this.product = product;
+            Product = product;
             Price = price;
             Quantity = quantity;
         }
 
-        public ProductInOrderItem product {  get; set; }
-
+        public ProductInOrderItem Product { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
-
-
     }
 }

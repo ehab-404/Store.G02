@@ -17,20 +17,17 @@ using Web.Extenstions;
 
 namespace Web
 {
-    public class Program
+   public class Program
     {
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add services to the container.
             builder.Services.RegisterAllServices(builder.Configuration);
-
-
-
+            
 
             var app = builder.Build();
-
-            await app.ConfigureMiddlewares();
 
             await app.ConfigureMiddlewares();
 
@@ -38,3 +35,4 @@ namespace Web
         }
     }
 }
+

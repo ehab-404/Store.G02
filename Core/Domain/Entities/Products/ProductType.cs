@@ -8,10 +8,6 @@ namespace Domain.Entities.Products
 {
     public class ProductType : BaseEntity<int>
     {
-
-      //  public int Id { get; set; }
         public string Name { get; set; }
-
-
     }
 }

@@ -6,23 +6,19 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities.Products
 {
-    public class Product :BaseEntity<int>
+    public class Product : BaseEntity<int>
     {
-        //public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string PictureUrl { get; set; }
-
         public decimal Price { get; set; }
+
+
         public int BrandId { get; set; }
         public ProductBrand Brand { get; set; }
 
 
-
         public int TypeId { get; set; }
         public ProductType Type { get; set; }
-
-        
-
     }
 }

@@ -8,10 +8,9 @@ namespace Shared
 {
     public class JwtOptions
     {
+        public string Issuer { get; set; }
+        public string Audience { get; set; }
         public string SecretKey { get; set; }
-        public string audience { get; set; }
-        public string issuer { get; set; }
-        public double DurationInDays { get; set; }
-
+        public double ExpireInDays { get; set; }
     }
 }

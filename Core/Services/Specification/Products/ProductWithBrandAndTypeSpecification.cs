@@ -9,88 +9,53 @@ using Shared.Dtos.Products;
 
 namespace Services.Specification.Products
 {
-    public class ProductWithBrandAndTypeSpecification:BaseSpecifications<int,Product>
+    public class ProductWithBrandAndTypeSpecification : BaseSpecification<Product, int>
     {
-        public ProductWithBrandAndTypeSpecification(/*Expression<Func<Product,bool>> expression*/
-            ):base(/*expression*/ null)
+        public ProductWithBrandAndTypeSpecification(ProductQueryParams productParams)
+        : base(BuildCriteria(productParams.BrandId, productParams.TypeId, productParams.Search))
         {
-
-            AppliedIncludes();
-
-
-
-
+            ApplyIncludes();
+            ApplySort(productParams.Sort);
+            AddPagination(productParams.PageIndex, productParams.PageSize);
         }
 
-
-        public ProductWithBrandAndTypeSpecification(ProductQueryParamters queryParamters) : base(
-
-            p => (!queryParamters.brandId.HasValue || p.BrandId==queryParamters.brandId )
-            &&
-            
-            (!queryParamters.typeId.HasValue ||  p.TypeId== queryParamters.typeId)
-            &&
-            ( string.IsNullOrEmpty(queryParamters.search)  ||  p.Name.ToLower().Contains(queryParamters.search.ToLower()) )
-
-
-            )
+        public ProductWithBrandAndTypeSpecification(int id) : base(p => p.Id == id)
         {
-
-
-            ApplyPagination(queryParamters.pageIndex,queryParamters.pageSize);
-
-            ApplySorting(queryParamters.sort);
-
-                AppliedIncludes();
-
-
-
-
+            ApplyIncludes();
         }
 
-
-       
-
-        public ProductWithBrandAndTypeSpecification(int id ) : base(p=>p.Id==id)
+        private void ApplyIncludes()
         {
-
-
-            AppliedIncludes();
-
-
-
+            AddIncludeExp(p => p.Brand);
+            AddIncludeExp(p => p.Type);
         }
 
-        private void AppliedIncludes()
+        private static Expression<Func<Product, bool>> BuildCriteria(int? brandId, int? typeId, string? search)
         {
-
-            Includes.Add(p => p.Brand);
-            Includes.Add(p => p.Type);
-
-
+            return p =>
+                (brandId == null || p.BrandId == brandId) &&
+                (typeId == null || p.TypeId == typeId) &&
+                (string.IsNullOrEmpty(search) || p.Name.ToLower().Contains(search.ToLower()));
         }
 
-        private void ApplySorting(string? sort)
+        private void ApplySort(string? sort)
         {
-
-
-            if (!string.IsNullOrEmpty(sort))
-            {
-
-                sort = sort.ToLower();
-
-                if (sort == "priceasc") { AddOrderBy(p => p.Price); }
-                else if (sort == "pricedesc") { AddOrderByDescinding(p => p.Price); }
-                else { AddOrderBy(p => p.Name); }
-
-            }
-
+            if (string.IsNullOrEmpty(sort))
+                AddOrderBy(p => p.Name);
             else
             {
-
-                // OrderBy = p => p.Name;
-                AddOrderBy(p => p.Name);
-
+                switch (sort.ToLower())
+                {
+                    case "priceasc":
+                        AddOrderBy(p => p.Price);
+                        break;
+                    case "pricedesc":
+                        AddOrderByDesc(p => p.Price);
+                        break;
+                    default:
+                        AddOrderBy(p => p.Name);
+                        break;
+                }
             }
         }
 

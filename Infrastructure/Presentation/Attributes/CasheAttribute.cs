@@ -11,82 +11,45 @@ using Services.Abstractions;
 
 namespace Presentation.Attributes
 {
-    public class CasheAttribute(int timeInSeconds) : Attribute, IAsyncActionFilter
+    public class CacheAttribute(int durationInSeconds) : Attribute, IAsyncActionFilter
     {
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            
-            //logic 
+            var cacheService = context.HttpContext.RequestServices.GetRequiredService<IServiceManager>().CacheService;
 
-          var casheservice =  context.HttpContext.RequestServices.GetRequiredService<IServiceManager>().casheService ;
+            var cacheKey = GenerateCachekey(context.HttpContext.Request);
 
-            //generate key 
+            var cachedValue = await cacheService.GetCachedValueAsync(cacheKey);
 
-            var cashekey = GetCaheKey(context.HttpContext.Request);
-
-
-            var result = await casheservice.GetAsync(cashekey) ;
-
-
-
-            if (!string.IsNullOrEmpty(result))
+            if (!string.IsNullOrEmpty(cachedValue))
             {
-                //return response 
-
-
-                var response = new ContentResult()
+                context.Result = new ContentResult()
                 {
-
-                    Content = result,
-                    ContentType="application/json",
-                    StatusCode=200
+                    ContentType = "application/json",
+                    Content = cachedValue
                 };
-
-                context.Result = response;
                 return;
-
-
-
-
             }
+            var contextResult = await next();
 
-
-       var actionContext =   await  next.Invoke();
-
-
-        if(actionContext.Result is OkObjectResult okObjectResult)
+            if (contextResult.Result is OkObjectResult okObjectResult)
             {
-
-                await casheservice.SetAsync(cashekey, okObjectResult.Value, TimeSpan.FromSeconds(timeInSeconds));
-
+                await cacheService.SetCachedValueAsync(cacheKey, okObjectResult.Value, TimeSpan.FromSeconds(durationInSeconds));
             }
+        }
 
 
-
-
-        } 
-
-        private string GetCaheKey( HttpRequest request)
+        private string GenerateCachekey(HttpRequest request)
         {
-
-
             var key = new StringBuilder();
-
             key.Append(request.Path);
 
-            foreach( var item in request.Query)
+            foreach (var item in request.Query.OrderBy(q => q.Key))
             {
-
-                key.Append($"{item.Key}-{item.Value}");
-
-               
-
+                key.Append($"|{item.Key}:{item.Value}");
             }
 
             return key.ToString();
-
-
         }
-
     }
 }

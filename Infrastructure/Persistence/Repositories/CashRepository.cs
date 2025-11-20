@@ -10,26 +10,21 @@ using StackExchange.Redis;
 
 namespace Persistence.Repositories
 {
-    public class CashRepository(IConnectionMultiplexer connectionMultiplexer) : ICashRepository
+    public class CacheRepository(IConnectionMultiplexer connection) : ICacheRepository
     {
+        private readonly IDatabase _database = connection.GetDatabase();
 
-        private readonly IDatabase _database= connectionMultiplexer.GetDatabase();
-
-        public async Task<string?> GetAsync(string id)
+        public async Task<string?> GetAsync(string key)
         {
-            var result =await _database.StringGetAsync(id);
-            return result;
-
+            var result = await _database.StringGetAsync(key);
+            return result.IsNullOrEmpty ? default : result;
         }
 
-        public async Task SetAsync(string id, object value, TimeSpan duration)
+        public async Task SetAsync(string key, object value, TimeSpan duration)
         {
+            var redisValue = JsonSerializer.Serialize(value);
 
-            var jsonvalue= JsonSerializer.Serialize(value);
-
-
-            await _database.StringSetAsync(id, jsonvalue, duration);
-
+            await _database.StringSetAsync(key, redisValue, duration);
         }
     }
 }

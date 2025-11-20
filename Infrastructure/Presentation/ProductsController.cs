@@ -15,146 +15,58 @@ namespace Presentation
 {
 
     [ApiController]
-    [Authorize]
     [Route("api/[controller]")]
-
-    public class ProductsController(IServiceManager _serviceManager):ControllerBase
+    public class ProductsController(IServiceManager _serviceManager) : ControllerBase
     {
-
-
-        [HttpGet]  // baseurl/api/Products    verb get 
-        [Cashe(60)]
-        [ProducesResponseType(StatusCodes.Status200OK,Type =typeof(PaginationResponse<ProductResponse>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError,Type =typeof(ErrorDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest,Type =typeof(ErrorDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound,Type =typeof(ErrorDetails))]
-        public async Task<ActionResult<PaginationResponse<ProductResponse>>> GetAllProductsAsync([FromQuery]ProductQueryParamters queryParamters)
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginationResponse<ProductResponse>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetail))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetail))]
+        [Cache(180)]
+        public async Task<ActionResult<PaginationResponse<ProductResponse>>> GetAllProducts([FromQuery] ProductQueryParams productParams)
         {
-
-
-            var result = await _serviceManager.productService.GetAllProductsAsync(queryParamters);
-
-
-
-            if(result is null)
-            {
-
-                return BadRequest();
-
-            }
+            var result = await _serviceManager.ProductService.GetAllProductsAsync(productParams);
 
             return Ok(result);
-
-
-
-
         }
 
-
-
-
-
-        [HttpGet("{id}")]  // baseurl/api/Products/1    verb get 
-
+        [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProductResponse))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorDetails))]
-
-
-        public async Task<ActionResult<ProductResponse>> GetProductByIdAsync(int? id)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetail))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetail))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorDetail))]
+        public async Task<ActionResult<ProductResponse>> GetProductById(int id)
         {
-            if(id is null) { return BadRequest(); }
-
-
-
-            var result = await _serviceManager.productService.GetProductByIdAsync(id.Value);
-
-
-
-            if (result is null)
-            {
-
-                return NotFound();
-
-            }
-
+            var result = await _serviceManager.ProductService.GetProductByIdAsync(id);
             return Ok(result);
-
-
-
-
         }
 
-
-
-        [HttpGet("/brands")] // baseurl/api/Products/brands    verb get 
-
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<BrandResponse>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorDetails))]
-
-
-
-        public async Task<ActionResult<IEnumerable<BrandResponse>>> GetAllProductBrandsAsync()
+        [HttpGet("brands")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TypeBrandResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetail))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetail))]
+        public async Task<ActionResult<TypeBrandResponse>> GetAllBrands()
         {
-
-            var result = await _serviceManager.productService.GetAllBrandsAsync();
+            var result = await _serviceManager.ProductService.GetAllBrandsAsync();
 
             if (result is null)
-            {
-
                 return NotFound();
 
-            }
-
             return Ok(result);
-
-
-
         }
 
-
-
-        [HttpGet("/types")] // baseurl/api/Products/types    verb get
-
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<TypeResponse>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetails))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetails))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ErrorDetails))]
-
-
-
-        public async Task<ActionResult<IEnumerable<TypeResponse>>> GetAllProductTypesAsync()
+        [HttpGet("types")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TypeBrandResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ErrorDetail))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ErrorDetail))]
+        public async Task<ActionResult<TypeBrandResponse>> GetAllTypes()
         {
-
-            var result = await _serviceManager.productService.GetAllTypesAsync();
+            var result = await _serviceManager.ProductService.GetAllTypesAsync();
 
             if (result is null)
-            {
-
                 return NotFound();
 
-            }
-
             return Ok(result);
-
-
-
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

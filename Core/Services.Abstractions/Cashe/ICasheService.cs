@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace Services.Abstractions.Cashe
 {
-    public interface ICasheService
+    public interface ICacheService
     {
-
-        Task<string?> GetAsync(string key);
-        Task SetAsync(string key, object value , TimeSpan duration);
-
+        Task<string?> GetCachedValueAsync(string key);
+        Task SetCachedValueAsync(string key, object value, TimeSpan duration);
     }
 }

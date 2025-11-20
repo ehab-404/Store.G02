@@ -15,68 +15,48 @@ using Shared.Dtos.Products;
 
 namespace Services.ProductServices
 {
-    public class ProductService(IUnitOfWork _unitOfWork , IMapper _mapper) : IProductService
+    public class ProductService(IUnitOfWork _unitOfWork, IMapper _mapper) : IProductService
     {
 
-        /*IEnumerable<ProductResponse>*/
-        public async Task< PaginationResponse<ProductResponse>> GetAllProductsAsync(ProductQueryParamters queryParamters)
+        public async Task<PaginationResponse<ProductResponse>> GetAllProductsAsync(ProductQueryParams productParams)
         {
+            // create new specification for products with its brand and category
+            var spec = new ProductWithBrandAndTypeSpecification(productParams);
 
-            //var specification = new BaseSpecifications<int, Product>(null);
-
-            //specification.Includes.Add(p => p.Brand);
-            //specification.Includes.Add(p => p.Type);
-
-            var specification = new ProductWithBrandAndTypeSpecification(queryParamters);
-
-
-
-
-            var products = await _unitOfWork.GetRepository<int, Product>().GetAllAsync(specification);
+            var products = await _unitOfWork.CreateRepository<Product, int>().GetAllAsync(spec);
             var result = _mapper.Map<IEnumerable<ProductResponse>>(products);
 
-            var totalSpec = new ProductCountSpecifications(queryParamters);
+            // get count of filtered products
+            var productSpecCount = new ProductCountSepecification(productParams);
+            var totalCount = await _unitOfWork.CreateRepository<Product, int>().CountAsync(productSpecCount);
 
-            var count = await _unitOfWork.GetRepository<int, Product>().GetCountAsync(totalSpec);
-
-
-
-            return new PaginationResponse<ProductResponse>(queryParamters.pageSize, queryParamters.pageIndex, count, result);
+            return new PaginationResponse<ProductResponse>(productParams.PageIndex, productParams.PageSize, totalCount, result);
         }
-
-        
 
         public async Task<ProductResponse> GetProductByIdAsync(int id)
         {
-            var specification = new ProductWithBrandAndTypeSpecification(id);
+            var spec = new ProductWithBrandAndTypeSpecification(id);
 
-
-            var product = await _unitOfWork.GetRepository<int, Product>().GetByIdAsync(specification);
-            if (product == null) { throw new ProductNotFoundException(id); }
+            var product = await _unitOfWork.CreateRepository<Product, int>().GetByIdAsync(spec);
+            if (product is null)
+                throw new ProductNotFoundException(id);
 
             var result = _mapper.Map<ProductResponse>(product);
             return result;
-
         }
 
-
-        public async Task<IEnumerable<BrandResponse>> GetAllBrandsAsync()
+        public async Task<IEnumerable<TypeBrandResponse>> GetAllBrandsAsync()
         {
-            var brands = await _unitOfWork.GetRepository<int, ProductBrand>().GetAllAsync();
-            var result = _mapper.Map<IEnumerable<BrandResponse>>(brands);
+            var brands = await _unitOfWork.CreateRepository<ProductBrand, int>().GetAllAsync();
+            var result = _mapper.Map<IEnumerable<TypeBrandResponse>>(brands);
             return result;
-
         }
 
-
-        public async Task<IEnumerable<TypeResponse>> GetAllTypesAsync()
+        public async Task<IEnumerable<TypeBrandResponse>> GetAllTypesAsync()
         {
-            var types = await _unitOfWork.GetRepository<int, ProductType>().GetAllAsync();
-            var result = _mapper.Map<IEnumerable<TypeResponse>>(types);
+            var types = await _unitOfWork.CreateRepository<ProductType, int>().GetAllAsync();
+            var result = _mapper.Map<IEnumerable<TypeBrandResponse>>(types);
             return result;
-
         }
-
-
     }
 }

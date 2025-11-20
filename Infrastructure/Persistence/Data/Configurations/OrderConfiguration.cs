@@ -13,20 +13,11 @@ namespace Persistence.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Order> builder)
         {
+            builder.Property(o => o.SubTotal).HasColumnType("decimal(18,2)");
 
-
-            //configure relationships 
-
-            builder.OwnsOne(p => p.ShippingAddress);
-            builder.HasOne(p => p.deliveryMethod).WithMany().HasForeignKey(p => p.DeliveryMethodId);
-
-            builder.HasMany(p => p.items).WithOne().OnDelete(DeleteBehavior.Cascade);
-
-
-            builder.Property(p => p.SubTotal).HasColumnType("decimal(18,2)");
-
-
-
+            builder.OwnsOne(o => o.ShippingAddress);
+            builder.HasMany(o => o.Items).WithOne().OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(o => o.DeliveryMethod).WithMany().HasForeignKey(o => o.DeliveryMethodId);
         }
     }
 }

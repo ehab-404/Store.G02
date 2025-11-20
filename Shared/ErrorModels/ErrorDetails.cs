@@ -6,22 +6,13 @@ using System.Threading.Tasks;
 
 namespace Shared.ErrorModels
 {
-    public class ErrorDetails
+    public class ErrorDetail
     {
-        public ErrorDetails(int statusCode, string errorMessage)
-        {
-            StatusCode = statusCode;
-            ErrorMessage = errorMessage;
-        }
-
-        public int StatusCode {  get; set; }
-        public string ErrorMessage {  get; set; }
-
+        public int StatusCode { get; set; }
+        public string ErrorMessage { get; set; }
         public IEnumerable<string>? Errors { get; set; }
-
-
     }
 
-    
+
 
 }

@@ -17,147 +17,141 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Shared;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using Store.C44.G02.Domain.Exceptions;
 
 namespace Services.Auth
 {
-    public class AuthService(UserManager<AppUser> _userManager
-       // , IConfiguration _configuration
-       , IOptions<JwtOptions> options
-
-        ) : IAuthService
+    public class AuthService(UserManager<AppUser> _userManager,
+        IOptions<JwtOptions> options,
+        IMapper _mapper) : IAuthService
     {
-        public async Task<string> GenerateJwtTokenAsync(AppUser user)
+        public async Task<UserResponse> LoginAsync(LoginRequestDto request)
         {
-            //header
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user is null)
+                throw new NotAuthorizedException();
 
+            var isValidPassword = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!isValidPassword)
+                throw new NotAuthorizedException();
 
-
-            //payload  : some data   like  claims 
-
-
-
-            //signiture
-
-
-            var jwtoptions = options.Value;
-
-
-            var authClaims = new List<Claim>() {
-
-
-                new Claim(ClaimTypes.Name,user.UserName),
-                new Claim(ClaimTypes.Email,user.Email)
-
-            };
-
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            foreach(var role in roles )
+            return new UserResponse()
             {
-                authClaims.Add(new Claim(ClaimTypes.Role ,role));
-
-
-
-
-            }
-
-
-            //var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtOptions:SecretKey"]));
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtoptions.SecretKey));
-
-
-            var token = new JwtSecurityToken(
-
-                //issuer: _configuration["JwtOptions:issuer"],
-                issuer: jwtoptions.issuer,
-               // audience: _configuration["JwtOptions:audience"],
-                audience: jwtoptions.audience,
-                claims: authClaims,
-              //  expires: DateTime.UtcNow.AddDays(double.Parse(_configuration["JwtOptions:DurationInDays"])),
-                expires: DateTime.UtcNow.AddDays(jwtoptions.DurationInDays),
-                signingCredentials:new SigningCredentials(secretKey,SecurityAlgorithms.HmacSha256Signature)
-                
-
-                );
-
-
-
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public async Task<UserResultDto> LoginAsync(LoginDto loginDto)
-        {
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
-
-            if ( user == null)
-            {
-                throw new UnAuthorizedException();
-                
-
-            }
-
-            var checkPasswordFlag = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-
-            if (!checkPasswordFlag) { throw new UnAuthorizedException(); }
-
-
-
-
-
-            return new UserResultDto()
-            {
-
-                DisplayName = user.DisplayName,
+                DisplayName = user.DiplayName,
                 Email = user.Email,
                 Token = await GenerateJwtTokenAsync(user)
-
-
             };
         }
 
-        public async Task<UserResultDto> RegisterAsync(RegisterDto registerDto)
+        public async Task<UserResponse> RegisterAsync(RegisterRequestDto request)
         {
-
             var user = new AppUser()
             {
-
-                DisplayName = registerDto.DisplayName,
-                UserName = registerDto.UserName,
-                Email = registerDto.Email,
-                PhoneNumber = registerDto.PhoneNumber
-
-
-
+                DiplayName = request.DisplayName,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                UserName = request.Email
             };
 
-                  var result = await  _userManager.CreateAsync(user, registerDto.Password);
+            var result = await _userManager.CreateAsync(user, request.Password);
+            if (!result.Succeeded)
+                throw new ValidationException(result.Errors.Select(e => e.Description));
 
-
-            if(!result.Succeeded)
+            return new UserResponse()
             {
+                DisplayName = user.DiplayName,
+                Email = user.Email,
+                Token = await GenerateJwtTokenAsync(user)
+            };
+        }
 
-                var errors = result.Errors.Select(error => error.Description);
+        public async Task<bool> CheckEmailExistsAsync(string userEmail)
+        {
+            return await _userManager.FindByEmailAsync(userEmail) is not null;
+        }
 
+        public async Task<UserResponse> GetCurrentUserAsync(string userEmail, string currentUesrToken)
+        {
+            var user = await _userManager.FindByEmailAsync(userEmail);
+            if (user is null)
+                throw new UserNotFoundException(userEmail);
 
-                throw new ValidationException(errors);
+            return new UserResponse()
+            {
+                DisplayName = user.DiplayName,
+                Email = userEmail,
+                Token = currentUesrToken!
+            };
+        }
 
+        public async Task<AddressDto> GetUserAddressAsync(string userEmail)
+        {
+            var user = await _userManager.Users.Include(u => u.Address).FirstOrDefaultAsync(u => u.Email.ToLower() == userEmail.ToLower());
+            if (user is null)
+                throw new UserNotFoundException(userEmail);
+
+            return _mapper.Map<AddressDto>(user.Address);
+        }
+
+        public async Task<AddressDto> UpdateUserAddressAsync(AddressDto address, string userEmail)
+        {
+            var user = await _userManager.Users.Include(u => u.Address).FirstOrDefaultAsync(u => u.Email.ToLower() == userEmail.ToLower());
+            if (user is null)
+                throw new UserNotFoundException(userEmail);
+
+            if (user.Address is null)
+            {
+                // Createing new Address
+                user.Address = _mapper.Map<Address>(address);
+            }
+            else
+            {
+                // Updating existed Address
+                user.Address.FirstName = address.FirstName;
+                user.Address.LastName = address.LastName;
+                user.Address.Country = address.Country;
+                user.Address.City = address.City;
+                user.Address.Street = address.Street;
             }
 
 
-            return new UserResultDto()
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                throw new UpdateUserAddressBadRequestException();
+
+            return _mapper.Map<AddressDto>(user.Address);
+        }
+
+
+        private async Task<string> GenerateJwtTokenAsync(AppUser user)
+        {
+            var jwtOptions = options.Value;
+
+            var authClaims = new List<Claim>()
             {
-
-                DisplayName = user.DisplayName,
-                Email = user.Email,
-                Token = await GenerateJwtTokenAsync(user)
-
-
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email)
             };
 
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (var role in roles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
-            throw new NotImplementedException();
+            var jwtSecretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
+
+            var token = new JwtSecurityToken(
+                issuer: jwtOptions.Issuer,
+                audience: jwtOptions.Audience,
+                claims: authClaims,
+                expires: DateTime.UtcNow.AddDays(jwtOptions.ExpireInDays),
+                signingCredentials: new SigningCredentials(jwtSecretKey, SecurityAlgorithms.HmacSha256Signature)
+                );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

@@ -9,26 +9,22 @@ using Shared.Dtos.Orders;
 
 namespace Services.Mapping.Orders
 {
-    public class OrderProfile :Profile
+    public class OrderProfile : Profile
     {
         public OrderProfile()
         {
+            CreateMap<Order, OrderResponse>()
+                .ForMember(or => or.DeliveryMethod, o => o.MapFrom(o => o.DeliveryMethod.ShortName))
+                .ForMember(or => or.Total, o => o.MapFrom(o => o.GetTotal()));
+
             CreateMap<OrderAddress, OrderAddressDto>().ReverseMap();
 
-            CreateMap<OrderItem, OrderItemDto>().
-                ForMember(d=>d.ProductId, s=>s.MapFrom(p=>p.Id)).
-                ForMember(d=>d.ProductName,s=>s.MapFrom(p=>p.product.ProductName)).
-                ForMember(d=>d.PictureUrl,s=>s.MapFrom(p=>p.product.PictureUrl))
-                ;
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(oid => oid.ProductId, o => o.MapFrom(oi => oi.Product.ProductId))
+                .ForMember(oid => oid.ProductName, o => o.MapFrom(oi => oi.Product.ProductName))
+                .ForMember(oid => oid.PictureUrl, o => o.MapFrom(oi => oi.Product.PictureUrl));
 
-            CreateMap<Order, OrderResponse>()
-                .ForMember(d=>d.DeliverMethod,d=>d.MapFrom(s=>s.deliveryMethod.ShortName))
-                .ForMember(d => d.Total, d => d.MapFrom(s => s.GetTotal()))
-                ;
-
-
-            CreateMap<DeliveryMethod, DeliveryMethodResponse>();
+            CreateMap<DeliveryMethod, DeliveryMethodResponse>().ReverseMap();
         }
-
     }
 }

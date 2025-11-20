@@ -8,21 +8,18 @@ using Services.Abstractions.Cashe;
 
 namespace Services.Cashe
 {
-    public class CasheService(ICashRepository _cashRepository) : ICasheService
+    public class CacheService(ICacheRepository cacheRepository) : ICacheService
     {
-        public async Task<string?> GetAsync(string key)
+        public async Task<string?> GetCachedValueAsync(string key)
         {
-            var result = await _cashRepository.GetAsync(key);
-
-
+            var result = await cacheRepository.GetAsync(key);
             return result;
+
         }
 
-        public async Task SetAsync(string key, object value, TimeSpan duration)
+        public async Task SetCachedValueAsync(string key, object value, TimeSpan duration)
         {
-            await _cashRepository.SetAsync(key,value, duration);
-
-
+            await cacheRepository.SetAsync(key, value, duration);
         }
     }
 }
